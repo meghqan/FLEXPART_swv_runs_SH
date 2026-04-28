@@ -87,17 +87,17 @@ lon_no_nan = single(rem((lon_no_nan+180),360)-180);
 % particles that contains an index corresponding to the time index in the
 % tropopause break array?)
 
-SH_breaklat = ncread("F:\_PhD\flexpart_swv_runs\ERA5_NH_SH_break_lat_v2.nc", ...
+SH_breaklat = ncread("F:\_PhD\flexpart_swv_runs\ERA5_NH_SH_break_lat_v3.nc", ...
     "SH_break_lat");
 SH_breaklat = medfilt1(SH_breaklat, 13);
-CPT_height = ncread("F:\_PhD\flexpart_swv_runs\CPT_height_temp_all_v2.nc", ...
+CPT_height = ncread("F:\_PhD\flexpart_swv_runs\CPT_height_temp_all_v3.nc", ...
     "CPT_height");
-CPT_lat = ncread("F:\_PhD\flexpart_swv_runs\CPT_height_temp_all_v2.nc", ...
+CPT_lat = ncread("F:\_PhD\flexpart_swv_runs\CPT_height_temp_all_v3.nc", ...
     "lat");
-pheight_380K = ncread("F:/_PhD/flexpart_swv_runs/height_380K.nc", "height_380K");
-SH_breaklat_lon = ncread("F:\_PhD\flexpart_swv_runs\ERA5_NH_SH_break_lat_v2.nc", ...
+pheight_380K = ncread("F:/_PhD/flexpart_swv_runs/height_380K_v2.nc", "height_380K");
+SH_breaklat_lon = ncread("F:\_PhD\flexpart_swv_runs\ERA5_NH_SH_break_lat_v3.nc", ...
     "lon");
-SH_breaklat_time = caldays(ncread("F:\_PhD\flexpart_swv_runs\ERA5_NH_SH_break_lat_v2.nc", ...
+SH_breaklat_time = caldays(ncread("F:\_PhD\flexpart_swv_runs\ERA5_NH_SH_break_lat_v3.nc", ...
     "time")) + datetime(2016, 10, 1);
 
 SH_breaklat_time_index = zeros(length(time),1);
@@ -333,11 +333,11 @@ for i = 1:length(lat)
                 % here I'm just saving the position 2 and 5 days on either side
                 % of the transition to the tropics because we were looking at
                 % how the water vapour changes around this boundary
-                if j + 50 < 720 && j - 125 > 0 && (in_the_tropics_edited(j,i) && ~in_the_tropics_edited(j+1,i))
-                    location_around_final_z(i,:) = z([j+50, j+25, j, j-25, j-50, j-75, j-100, j-125], i); 
-                    location_around_final_lat(i,:) = lat([j+50, j+25, j, j-25, j-50, j-75, j-100, j-125], i); 
-                    location_around_final_lon(i,:) = lon([j+50, j+25, j, j-25, j-50, j-75, j-100, j-125], i); 
-                    location_around_final_prs(i,:) = prs([j+50, j+25, j, j-25, j-50, j-75, j-100, j-125], i); 
+                if j + 48 < 720 && j - 240 > 0 && (in_the_tropics_edited(j,i) && ~in_the_tropics_edited(j+1,i))
+                    location_around_final_z(i,:) = z([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120, j-144, j-168, j-192, j-216, j-240], i); 
+                    location_around_final_lat(i,:) = lat([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120, j-144, j-168, j-192, j-216, j-240], i); 
+                    location_around_final_lon(i,:) = lon([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120, j-144, j-168, j-192, j-216, j-240], i); 
+                    location_around_final_prs(i,:) = prs([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120, j-144, j-168, j-192, j-216, j-240], i); 
                 end
 
                 if ~below_the_tropopause_edited(j,i)
