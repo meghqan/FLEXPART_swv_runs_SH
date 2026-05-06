@@ -1,5 +1,3 @@
-% NEED TO EDIT FOR SH RUNS
-
 function length_bt = SaveFinalState_v3(filenames, save_file, time_offset)
 
 %read in the flexpart data:
@@ -333,11 +331,11 @@ for i = 1:length(lat)
                 % here I'm just saving the position 2 and 5 days on either side
                 % of the transition to the tropics because we were looking at
                 % how the water vapour changes around this boundary
-                if j + 48 < 720 && j - 240 > 0 && (in_the_tropics_edited(j,i) && ~in_the_tropics_edited(j+1,i))
-                    location_around_final_z(i,:) = z([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120, j-144, j-168, j-192, j-216, j-240], i); 
-                    location_around_final_lat(i,:) = lat([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120, j-144, j-168, j-192, j-216, j-240], i); 
-                    location_around_final_lon(i,:) = lon([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120, j-144, j-168, j-192, j-216, j-240], i); 
-                    location_around_final_prs(i,:) = prs([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120, j-144, j-168, j-192, j-216, j-240], i); 
+                if j + 48 < 720 && j - 120 > 0 && (in_the_tropics_edited(j,i) && ~in_the_tropics_edited(j+1,i))
+                    location_around_final_z(i,:) = z([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120], i); 
+                    location_around_final_lat(i,:) = lat([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120], i); 
+                    location_around_final_lon(i,:) = lon([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120], i); 
+                    location_around_final_prs(i,:) = prs([j+48, j+24, j, j-24, j-48, j-72, j-96, j-120], i); 
                 end
 
                 if ~below_the_tropopause_edited(j,i)

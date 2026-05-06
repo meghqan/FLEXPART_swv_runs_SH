@@ -5,28 +5,16 @@
 
 % trying to calculate the mass of water vapour in the starting region
 
-
-function t0 = read_flexpart_time(ncfile)
-    u = split(ncreadatt(ncfile,'time','units'));
-    d = split(u{3},'-');
-    h = split(u{4},':');
-    t0 = datetime(str2double(d{1}),str2double(d{2}),str2double(d{3}), ...
-                  str2double(h{1}),str2double(h{2}),0);
-end
-
-
 figure_number = 1;
 % MLS water vapour:
-wv_file = "F:/_PhD/MLS_H2O/MLS_v5_H2O.nc";
-wv = ncread(wv_file, "h2o");
-wv_time = caldays(ncread(wv_file, "time")) + datetime(1950,1,1);
-wv_lev = ncread(wv_file, "lev");
-wv_lat = ncread(wv_file, "lat");
-wv_lon = ncread(wv_file, "lon");
-clear wv_file
+wv = ncread("F:/_PhD/MLS_H2O/MLS_v5_H2O.nc", "h2o");
+wv_time = caldays(ncread("F:/_PhD/MLS_H2O/MLS_v5_H2O.nc", "time")) + datetime(1950,1,1);
+wv_lev = ncread("F:/_PhD/MLS_H2O/MLS_v5_H2O.nc", "lev");
+wv_lat = ncread("F:/_PhD/MLS_H2O/MLS_v5_H2O.nc", "lat");
+wv_lon = ncread("F:/_PhD/MLS_H2O/MLS_v5_H2O.nc", "lon");
 
 % only want 2017:
-t1 = find(year(wv_time) == 2017, 1, 'first')-10;
+t1 = find(year(wv_time) == 2017, 1, 'first')-60;
 t2 = find(year(wv_time) == 2018 & month(wv_time) == 1, 1, 'last')+10;
 
 wv = wv(:,:,:,t1:t2) * 18.015/28.97 * 10^-6; % go from VMR to MMR
@@ -40,8 +28,9 @@ c = ["#1171BE"; "#DD5400"; "#EDB120"; ...
     "#8516D1"; "#3BAA32"; "#2FBEEF"; ...
     "#D1048B"; "#FFD60A"; "#6582FD"; "#FF453A"; "#00A3A3"; "#CB845D"];
 
-filenames = ["partoutput_20161103075959.nc", ...
-    "partoutput_20161201075959.nc", "partoutput_20161229075959.nc", ...
+% "partoutput_20161103050000.nc", ...
+% "partoutput_20161103075959.nc",
+filenames = ["partoutput_20161201075959.nc", "partoutput_20161229075959.nc", ...
     "partoutput_20170126050000.nc", "partoutput_20170223050000.nc", ...
     "partoutput_20170323050000.nc", "partoutput_20170420050000.nc", ...
     "partoutput_20170518050000.nc", "partoutput_20170615050000.nc", ...
@@ -49,87 +38,61 @@ filenames = ["partoutput_20161103075959.nc", ...
     "partoutput_20170907050000.nc", "partoutput_20171005050000.nc", ...
     "partoutput_20171102050000.nc", "partoutput_20171130050000.nc"];
 
-index = 1:15;
-
-% preallocate array sizes:
-nfiles = numel(index);
-nPart = 0;
-
-for i = 1:nfiles
-    % if i < 14
-        S = load(sprintf('F:/_PhD/flexpart_swv_runs/SH_d_WK1/SH_d_WK%d_final_state',index(i)), ...
-            'final_state');
-    % else
-    %     S = load(sprintf('F:/_PhD/flexpart_swv_runs/SH_d_WK1/SH_d_WK%d_final_state_v2',index(i)), ...
-    %     'final_state');
-    % end
-    nPart = nPart + height(S.final_state);
-end
-final_state_all = NaN(nPart, width(S.final_state));
-sh = NaN(nPart, 1);
-lat = NaN(nPart, 1);
-lon = NaN(nPart, 1);
-prs = NaN(nPart, 1);
-
-final_idx = NaN(nPart,1);
-start_time_all = NaT(nPart,1);
-time_final_state_all = NaT(nPart,1);
-
-starting_lat_all = NaN(nPart,1);
-starting_lon_all = NaN(nPart,1);
-starting_z_all   = NaN(nPart,1);
-starting_prs_all = NaN(nPart,1);
-
-bad_idx = false(nPart,1);
-% preallocate array sizes ^
+index = 2:15;
 
 filenames_nc = "SH_d_WK" + index + "_traj.nc";
-% filenames_nc(14) = "SH_d_WK14_v2_traj.nc";
-% filenames_nc(15) = "SH_d_WK15_v2_traj.nc";
+filenames_nc(1) = "SH_d_WK" + index(1) + "_v2_traj.nc";
+filenames_nc(2) = "SH_d_WK" + index(2) + "_v2_traj.nc";
+filenames_nc(8) = "SH_d_WK" + index(8) + "_v2_traj.nc";
+filenames_nc(13) = "SH_d_WK" + index(13) + "_v2_traj.nc";
+filenames_nc(14) = "SH_d_WK" + index(14) + "_v2_traj.nc";
 
 idx_all = 1;
 idx = 1;
 t_index = 1;
 k = 1;
-
-% figure()
-% hold on
-% grid on
-
+bad_idx = [];
 for i = 1:length(index)
-    % if i < 14
+    if i < 13
         load(strcat('F:\_PhD\flexpart_swv_runs\SH_d_WK1\SH_d_WK', ...
             num2str(index(i)), '_final_state'), 'final_state', 'start_idx', ...
             'time', 'starting_lat', 'starting_lon', 'starting_z', ...
             'starting_prs', 'location_around_final_lon', ...
             'location_around_final_lat', 'location_around_final_z', ...
             'location_around_final_prs');
-    % else
-    %     load(strcat('F:\_PhD\flexpart_swv_runs\SH_d_WK1\SH_d_WK', ...
-    %         num2str(index(i)), '_final_state_v2'), 'final_state', 'start_idx', ...
-    %         'time', 'starting_lat', 'starting_lon', 'starting_z', ...
-    %         'starting_prs', 'location_around_final_lon', ...
-    %         'location_around_final_lat', 'location_around_final_z', ...
-    %         'location_around_final_prs');
-    % end
+    else
+        load(strcat('F:\_PhD\flexpart_swv_runs\SH_d_WK1\SH_d_WK', ...
+            num2str(index(i)), '_final_state_v2'), 'final_state', 'start_idx', ...
+            'time', 'starting_lat', 'starting_lon', 'starting_z', ...
+            'starting_prs', 'location_around_final_lon', ...
+            'location_around_final_lat', 'location_around_final_z', ...
+            'location_around_final_prs');
+    end
    
-    ncfile = "Z:/Shared/FLEXPART_wv_2017_output/SH_d_WK" + ...
-        index(i) + "/" + filenames(i);
-    
-    t0 = read_flexpart_time(ncfile);
-    d  = seconds(ncread(ncfile,'time')) + t0;
-    time_final_state_all(idx_all:idx_all+height(final_state)-1) = ...
-        hours(start_idx' + final_state.TimeIndex - 1) + d(end);
+    time_units= ncreadatt("Z:/Shared/FLEXPART_wv_2017_output/SH_d_WK" + ...
+        index(i) + "/" + filenames(i), "time", "units");
+    time_units = split(time_units, ' ');
+    time_unit_day = split(time_units{3}, '-');
+    time_unit_hour = split(time_units{4}, ':');
 
+    time_offset = datetime(str2double(time_unit_day{1}), ...
+        str2double(time_unit_day{2}), str2double(time_unit_day{3}), ...
+        str2double(time_unit_hour{1}), str2double(time_unit_hour{2}), 0);
+    d = seconds(ncread("Z:/Shared/FLEXPART_wv_2017_output/SH_d_WK" + ...
+        index(i) + "/" + filenames(i), 'time')) + time_offset;
+
+    first_day = d(end);
 
     final_state_all(idx_all:idx_all+height(final_state)-1,:) = table2array(final_state);
-    start_time_all(idx_all:idx_all+height(final_state)-1,1) = time(start_idx);
+    start_time_all(idx_all:idx_all+height(final_state)-1,1) = time(start_idx+719) + hours(1);
+    time_final_state_all(idx_all:idx_all+height(final_state)-1) = ...
+        hours(start_idx' + final_state.TimeIndex - 1) + first_day; 
     final_idx(idx_all:idx_all+height(final_state)-1) = final_state.TimeIndex;
 
-    location_around_final_lon_all(idx_all:idx_all+height(final_state)-1, :) = location_around_final_lon(:,1:8);
-    location_around_final_lat_all(idx_all:idx_all+height(final_state)-1, :) = location_around_final_lat(:,1:8);
-    location_around_final_z_all(idx_all:idx_all+height(final_state)-1, :) = location_around_final_z(:,1:8);
-    location_around_final_prs_all(idx_all:idx_all+height(final_state)-1, :) = location_around_final_prs(:,1:8);
+    location_around_final_lon_all(idx_all:idx_all+height(final_state)-1, :) = location_around_final_lon;
+    location_around_final_lat_all(idx_all:idx_all+height(final_state)-1, :) = location_around_final_lat;
+    location_around_final_z_all(idx_all:idx_all+height(final_state)-1, :) = location_around_final_z;
+    location_around_final_prs_all(idx_all:idx_all+height(final_state)-1, :) = location_around_final_prs;
 
     starting_lat_all(idx_all:idx_all+height(final_state)-1, :) = starting_lat;
     starting_lon_all(idx_all:idx_all+height(final_state)-1, :) = starting_lon;
@@ -140,8 +103,15 @@ for i = 1:length(index)
     lat_i = ncread(filenames_nc(i), "lat");
     lon_i = ncread(filenames_nc(i), "lon");
     prs_i = ncread(filenames_nc(i), "prs");
-
+    % GET RID OF THIS IF NOTHING IS PRINTED
+    if length(sh_i) ~= height(final_state)
+        disp(index(i))
+    end
+    %
     for j = 1:length(sh_i)
+        % if idx_all+j-1 == 199555
+        %     stop = 1;
+        % end
         if ~isnan(final_state.TimeIndex(j)) && final_state.TimeIndex(j)-120 > 0
             % save @ 5 days before entrainment
             sh(idx_all+j-1, 1) = sh_i(final_state.TimeIndex(j)-120, j);
@@ -165,34 +135,28 @@ for i = 1:length(index)
             prs(idx_all+j-1, 1) = NaN;
         end
     end
-
-    % scatter(ones(length(idx_all:idx_all+height(final_state)-1), 1) * i, time_final_state_all(idx_all:idx_all+height(final_state)-1))
-    % drawnow
-
+    
     idx_all = idx_all + height(final_state);
 
-    clear final_state start_idx SH_breaklat_time_index f s sh_i lat_i lon_i prs_i
+    clear final_state start_idx SH_breaklat_time_index f s 
 end
-% yline(datetime(2016, 11, 1):calmonths(1):datetime(2018,2,1))
-
 sh(sh == 0) = NaN;
 
 sh = sh ./ (1 - sh); % CONVERT FROM KG/MOIST AIR to KG/DRY AIR
-%%
-
-final_state_all(bad_idx,:) = [];
-sh(bad_idx) = [];
-lat(bad_idx) = [];
-lon(bad_idx) = [];
-prs(bad_idx) = [];
-starting_lat_all(bad_idx) = [];
-starting_lon_all(bad_idx) = [];
-starting_prs_all(bad_idx) = [];
-starting_z_all(bad_idx) = [];
-final_idx(bad_idx) = [];
-start_time_all(bad_idx) = [];
-time_final_state_all(bad_idx) = [];
-
+if ~isempty(bad_idx)
+    final_state_all(bad_idx,:) = [];
+    sh(bad_idx) = [];
+    lat(bad_idx) = [];
+    lon(bad_idx) = [];
+    prs(bad_idx) = [];
+    starting_lat_all(bad_idx) = [];
+    starting_lon_all(bad_idx) = [];
+    starting_prs_all(bad_idx) = [];
+    starting_z_all(bad_idx) = [];
+    final_idx(bad_idx) = [];
+    start_time_all(bad_idx) = [];
+    time_final_state_all(bad_idx) = [];
+end
 % sh = sh * 10^6 * 28.97 / 18.015; % convert from kg/kg to ppmv
 %%
 g = 9.81;
@@ -335,8 +299,6 @@ for i = 1:length(release_windows)
     disp("pt 2 i=" + i)
     % LOOPING OVER ALL TRAJECTORIES
     for j = 1:length(starting_lat_i{i})
-       
-
         lon_idx = find(lon_left == starting_lon_i_5{i}(j));
         lat_idx = find(lat_bottom == starting_lat_i_4{i}(j));
         prs_idx = find(wv_lev == starting_prs_i_mls{i}(j));
@@ -345,6 +307,7 @@ for i = 1:length(release_windows)
         lev_i = starting_prs_i{i}(j);
         if lev_i > 315
             lev_idx = 7;
+            % lev_i = wv_lev(7);
             bad_idx_start(k) = i;
             k = k + 1;
         else
@@ -422,6 +385,7 @@ for i = 1:length(release_windows)
             lev_i = ending_prs{i}(j);
             if lev_i > 315
                 lev_idx = 7;
+                % lev_i = wv_lev(7);
                 bad_idx_start(k) = i;
                 k = k + 1;
             else
@@ -517,20 +481,6 @@ wv_kg_initial_SH = wv_kg_trajectories_initial_plot;
 save('Tg_water_SH_v6.mat', 'release_windows_SH', ...
     'wv_kg_trajectories_plot_SH', 'wv_kg_initial_SH', ...
     'wv_kg_trajectories_plot_entrain_only_SH')
-
-%%
-
-figure(figure_number)
-figure_number = figure_number + 1;
-hold on
-grid on
-box on
-plot(release_windows, wv_kg_trajectories_plot./wv_kg_trajectories_initial_plot * 100, 'linewidth', 2)
-% ylabel('Water vapour in the initialization region [Tg]')
-
-xlim([release_windows(1) release_windows(end)])
-set(gca, 'fontsize', 16)
-ylabel('Water vapour [Tg]')
 
 %% ! CHECKING THE SEASONAL CYCLE !
 

@@ -1,4 +1,33 @@
-function SaveTrajectories(filenames, save_file, time_offset)
+
+% % WK 2
+% filenamesWK2 = ["partoutput_20170125235959_init.nc", "partoutput_20170107095959.nc", ...
+%     "partoutput_20161219205959.nc", "partoutput_20161201075959.nc"];
+% file_prefix = "Z:/Shared/FLEXPART_wv_2017_output/SH_d_WK2/";
+% filenamesWK2 = file_prefix + filenamesWK2;
+% 
+% filenames = filenamesWK2;
+% save_file = '2_v2';
+% time_offset = datetime(2017,1,25,23,59,0);
+
+% % WK3:
+% filenamesWK3 = ["partoutput_20170222235959_init.nc", "partoutput_20170204095959.nc", ...
+%     "partoutput_20170116205959.nc", "partoutput_20161229075959.nc"];
+% file_prefix = "Z:/Shared/FLEXPART_wv_2017_output/SH_d_WK3/";
+% filenamesWK3 = file_prefix + filenamesWK3;
+% 
+% filenames = filenamesWK3;
+% save_file = '3_v2';
+% time_offset = datetime(2017,2,22,23,59,0);
+
+% WK9:
+filenamesWK9 = ["partoutput_20170809210000_init.nc", "partoutput_20170722070000.nc", ...
+    "partoutput_20170703180000.nc", "partoutput_20170615050000.nc"];
+file_prefix = "Z:/Shared/FLEXPART_wv_2017_output/SH_d_WK9/";
+filenamesWK9 = file_prefix + filenamesWK9;
+
+filenames = filenamesWK9;
+save_file = '9_v2';
+time_offset = datetime(2017,8,9,21,0,0);
 
 %read in the flexpart data:
 z = NaN(1389, 432000);
@@ -207,5 +236,3 @@ ncwriteatt("SH_d_WK"+save_file+"_traj.nc", "pv", "units", "pvu")
 ncwriteatt("SH_d_WK"+save_file+"_traj.nc", "pv", "Description", "Potential vorticity along trajectories")
 ncwriteatt("SH_d_WK"+save_file+"_traj.nc", "time", "units", "seconds since " + string(time_offset))
 ncwriteatt("SH_d_WK"+save_file+"_traj.nc", "start_idx", "Description", "Time index where the particle starts")
-
-end
